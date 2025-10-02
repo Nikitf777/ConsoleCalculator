@@ -1,62 +1,50 @@
-﻿try {
+﻿using ConsoleCalculator;
 
-	Console.WriteLine("Welcome to ConsoleCalculator. Press ^C (Ctrl+C) to exit.");
+var calculator = new Calculator([
+	("+", new OperationAdd()),
+	("-", new OperationSubtract()),
+	("*", new OperationMultiply()),
+	("/", new OperationDivide())
+]);
 
-	while (true) {
-		Console.Write("Enter the first number:");
-		var line = Console.ReadLine();
+calculator.Run();
 
-		if (double.TryParse(line, out var firstNumber)) {
-
-			Console.Write("Press the desired operation key | + | - | * | / |: ");
-			var key = Console.ReadKey();
-
-			Console.Write("\nEnter the second number:");
-			line = Console.ReadLine();
-			if (double.TryParse(line, out var secondNumber)) {
-				switch (key.Key) {
-					case ConsoleKey.Add: {
-						PrintResult(firstNumber + secondNumber);
-						continue;
-					}
-					case ConsoleKey.Subtract: {
-						PrintResult(firstNumber - secondNumber);
-						continue;
-					}
-					case ConsoleKey.Multiply: {
-						PrintResult(firstNumber * secondNumber);
-						continue;
-					}
-					case ConsoleKey.Divide: {
-						if (secondNumber == 0.0) {
-							Console.Error.WriteLine("Error: Division by zero. Skipping...");
-							continue;
-						}
-						PrintResult(firstNumber / secondNumber);
-						continue;
-					}
-					default: { continue; }
-				}
-			} else {
-				ParseError();
-				continue;
-			}
-		} else {
-			ParseError();
-			continue;
-		}
+internal sealed class OperationAdd : IOperation
+{
+	public bool TryCalculateResult(double firstNumber, double secondNumber, out double result)
+	{
+		result = firstNumber + secondNumber;
+		return true;
 	}
-} catch (Exception e) {
-	Console.Error.Write(e);
-	return 1;
 }
 
-static void ParseError()
+internal sealed class OperationSubtract : IOperation
 {
-	Console.Error.WriteLine("Error: Cannot parse the line to a System.Double. Skipping...");
+	public bool TryCalculateResult(double firstNumber, double secondNumber, out double result)
+	{
+		result = firstNumber - secondNumber;
+		return true;
+	}
 }
 
-static void PrintResult(double result)
+internal sealed class OperationMultiply : IOperation
 {
-	Console.WriteLine($"Result: {result}");
+	public bool TryCalculateResult(double firstNumber, double secondNumber, out double result)
+	{
+		result = firstNumber * secondNumber;
+		return true;
+	}
+}
+
+internal sealed class OperationDivide : IOperation
+{
+	public bool TryCalculateResult(double firstNumber, double secondNumber, out double result)
+	{
+		result = firstNumber / secondNumber;
+		if (secondNumber == 0.0) {
+			Console.Error.WriteLine("Error: Division by zero.");
+			return false;
+		}
+		return true;
+	}
 }
