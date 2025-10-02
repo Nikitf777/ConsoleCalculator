@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace ConsoleCalculator;
 
 public interface IOperation
@@ -8,6 +10,7 @@ public interface IOperation
 public class Calculator
 {
 	private readonly Dictionary<string, IOperation> operations = [];
+	private string operationNamesStringCache = string.Empty;
 
 	public Calculator() { }
 
@@ -22,14 +25,27 @@ public class Calculator
 	{
 		if (!this.operations.TryAdd(name, operation)) {
 			Console.Error.WriteLine($"Error: An operation with name {operation} is already added");
+			return;
 		}
+		this.UpdateOperationStringCache();
 	}
 
 	public void RemoveOperation(string name)
 	{
 		if (!this.operations.Remove(name)) {
 			Console.Error.WriteLine($"Error: Operation {name} is not found.");
+			return;
 		}
+		this.UpdateOperationStringCache();
+	}
+
+	private void UpdateOperationStringCache()
+	{
+		var builder = new StringBuilder().Append("Enter the desired operation:\n");
+		foreach (var operation in this.operations) {
+			_ = builder.Append("| ").Append(operation.Key).Append(" |\n");
+		}
+		this.operationNamesStringCache = builder.ToString();
 	}
 
 	public void Run()
@@ -45,10 +61,7 @@ public class Calculator
 			Console.WriteLine("Enter the desired operation:");
 			IOperation? enteredOperation;
 			do {
-				Console.WriteLine("Enter the desired operation:");
-				foreach (var operation in this.operations) {
-					Console.WriteLine($"| {operation.Key} |");
-				}
+				Console.Write(this.operationNamesStringCache);
 			} while ((enteredOperation = this.TryGetOperation()) is null);
 
 			double secondNumber;
